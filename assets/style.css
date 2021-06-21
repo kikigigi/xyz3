@@ -1,0 +1,76 @@
+/*** Body ***/
+body {
+    border: none !important;
+    margin: 0 !important;
+}
+
+
+/*** Graph ***/
+#graph{
+    background-color:rgb(17, 17, 17);
+    color: #fff
+}
+
+/*** Selector ***/
+#selectors {
+    background-color:  #1e2761;
+    color: #408ec6;
+    padding: 15px 0 0 0;
+}
+
+/* DateRangePicker */
+.DateRangePickerInput {
+    background-color: #BBBBBB;
+    border-color: #fff;
+    border-width: 0.5px;
+
+}
+
+.DateInput_input, .DateInput_input_1 {
+  font-size: 14px;  /*or whatever size you would like to have*/
+  background-color: #BBBBBB;
+  color: #000;
+  Height: 30px;
+}
+
+.DateInput, .DateInput_1 {
+  width: 100%;
+  color: #000;
+}
+
+/* Dropdown */
+.Select--multi .Select-value {
+  color: #000000;
+}
+
+.Select--single > .Select-control .Select-value, .Select-placeholder {
+    border: 0px;
+    border-radius: 0px;
+}
+
+/* for the dropdown with multi selections */
+.Select-control {
+  background-color: #BBBBBB !important;
+}
+
+/* for the dropdown list selection background color and font color */
+#working_hour_group_selector .Select-menu-outer {
+  background-color: #322e2f;
+  color: #408ec6
+}
+
+#y_selector .Select-menu-outer {
+  background-color: #322e2f;
+  color: #408ec6
+}
+
+#x_selector .Select-menu-outer {
+  background-color: #322e2f;
+  color: #408ec6;
+}
+
+#box_x_selector .Select-menu-outer {
+  background-color: #322e2f;
+  color: #408ec6
+}
+
