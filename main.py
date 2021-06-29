@@ -59,6 +59,14 @@ df.loc[(df['bytes'] <= 30000) & (df['bytes'] > 4950), 'labels'] = '2'
 df.loc[(df['bytes'] <= 80000) & (df['bytes'] > 29950), 'labels'] = '3'
 df.loc[df['bytes'] > 79950, 'labels'] = '4'
 
+df['description'] = '0'
+df.loc[df['labels'] == '0', 'description'] = 'very low activity and risk'
+df.loc[df['labels'] == '1', 'description'] = 'low activity and risk'
+df.loc[df['labels'] == '2', 'description'] = 'medium activity and risk'
+df.loc[df['labels'] == '3', 'description'] = 'high activity and risk'
+df.loc[df['labels'] == '4', 'description'] = 'very high activity and risk'
+
+
 ### dictionaries and features
 date_dict = [{'label': date, 'value': date} for date in dates]
 features = ['flows', 'bytes', 'packets', 'flow_duration', 'communications', 'country']
@@ -83,7 +91,7 @@ server = app.server
 app.layout = dbc.Container([
                             dbc.Row([
                                 dbc.Col(html.Label('Dashboard'),
-                                        style={'padding': '10px 0 10px 20px', 'font-size': '20px',
+                                        style={'padding': '10px 0 4px 20px', 'font-size': '20px',
                                                'background-color': 'rgb(17, 17, 17'})
                             ]),
                             dbc.Row([
@@ -189,7 +197,7 @@ def update_box_plot(start_date, end_date, selected_box_x, selected_y, selected_l
     filtered_df = filtered_df[filtered_df['labels'].isin(selected_label)]
 
     if type(selected_working_hour_group) == str:
-        selected_working_group = [selected_working_hour_group]
+        selected_working_hour_group = [selected_working_hour_group]
 
     if 'all' not in selected_working_hour_group:
         filtered_df = filtered_df[filtered_df['working_hour_group'].isin(selected_working_hour_group)]
@@ -204,7 +212,7 @@ def update_box_plot(start_date, end_date, selected_box_x, selected_y, selected_l
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         title=f"{x_str} vs. {y_str}",
-        title_font_color='#BBBBBB',
+        title_font_color='#408ec6',
         xaxis={'title': f'{x_str}', 'color':'#BBBBBB'},
         yaxis={'title': f'{y_str}', 'color':'#BBBBBB'}
     )
@@ -234,22 +242,29 @@ def update_sunburst_plot(start_date, end_date, selected_y, selected_label, selec
 
     filtered_df = filtered_df[filtered_df['labels'].isin(selected_label)]
 
-    # if type(selected_working_hour_group) == str:##########################
-    #     selected_working_hour_group = [selected_working_hour_group]
-    #
-    # if 'all' not in selected_working_hour_group:
-    #     filtered_df = filtered_df[filtered_df['working_hour_group'].isin(selected_working_hour_group)]
+    if type(selected_working_hour_group) == str:
+        selected_working_hour_group = [selected_working_hour_group]
 
-    fig = px.sunburst(filtered_df, path=['labels', 'working_hour_group'],
-                      color_discrete_sequence=px.colors.qualitative.Safe, values=selected_y)
+    if 'all' not in selected_working_hour_group:
+        filtered_df = filtered_df[filtered_df['working_hour_group'].isin(selected_working_hour_group)]
+
+    fig = px.sunburst(filtered_df, path=['labels', 'day_group', 'working_hour_group'],
+                      color=selected_y,
+                      maxdepth=-1,
+                      color_continuous_scale=px.colors.sequential.YlGnBu,
+                      hover_name='labels',
+                      hover_data={'labels': False})
 
     y_str = ' '.join(selected_y.split('_'))
+
+    fig.update_traces(textinfo='label+percent parent')
     fig.update_layout(
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         title=f"{y_str}",
-        title_font_color='#BBBBBB',
-    )
+        title_font_color='#408ec6'
+        )
+    fig.update_coloraxes(colorbar_title=dict(text=y_str))
 
     return fig
 
@@ -290,7 +305,7 @@ def update_scatter_plot(start_date, end_date, selected_x, selected_y, selected_l
                      category_orders={'labels': unique_labels},
                      color='labels',
                      color_discrete_sequence=px.colors.qualitative.Safe,
-                     hover_data=['ips', 'labels', selected_y, selected_x])
+                     hover_data=['ips', 'labels', selected_y, selected_x, 'description'])
 
     y_str = ' '.join(selected_y.split('_'))
     x_str = ' '.join(selected_x.split('_'))
@@ -298,7 +313,7 @@ def update_scatter_plot(start_date, end_date, selected_x, selected_y, selected_l
                     paper_bgcolor='rgba(0,0,0,0)',
                     plot_bgcolor='rgba(0,0,0,0)',
                     title=f'{x_str} vs. {y_str}',
-                    title_font_color='#BBBBBB',
+                    title_font_color='#408ec6',
                     xaxis={'title': f'{x_str}', 'color':'#BBBBBB'},
                     yaxis={'title': f'{y_str}', 'color': '#BBBBBB'})
 
@@ -325,13 +340,15 @@ def update_heatmap_plot(start_date, end_date, selected_label):
 
     filtered_df = filtered_df[filtered_df['labels'].isin(selected_label)]
     fig = px.density_heatmap(filtered_df, x='working_hour_group', y='day_group', z='count',
-                             color_continuous_scale='haline', template="plotly_dark")
+                             color_continuous_scale=px.colors.sequential.YlGnBu,
+                             #color_continuous_scale='haline'
+                             )
 
     fig.update_layout(
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         title=f'working hour group vs. day group',
-        title_font_color='#BBBBBB',
+        title_font_color='#408ec6',
         xaxis={'title': 'working hour group', 'color':'#BBBBBB'},
         yaxis={'title': 'day group', 'color':'#BBBBBB'}
     )
@@ -367,7 +384,7 @@ def update_polar_plot(start_date, end_date, selected_y, selected_label, selected
     if 'all' not in selected_working_hour_group:
         filtered_df = filtered_df[filtered_df['working_hour_group'].isin(selected_working_hour_group)]
 
-    fig = px.line_polar(filtered_df, r=selected_y, theta='hour', color='labels', template="plotly_dark",
+    fig = px.line_polar(filtered_df, r=selected_y, theta='hour', color='labels',
                         category_orders={'labels': [label for label in unique_labels]},
                         color_discrete_sequence=px.colors.qualitative.Safe)
     y_str = ' '.join(selected_y.split())
@@ -375,7 +392,7 @@ def update_polar_plot(start_date, end_date, selected_y, selected_label, selected
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         title=f'{y_str} vs. time',
-        title_font_color='#BBBBBB')
+        title_font_color='#408ec6')
     # change the color of the polar axes
     fig.update_polars(bgcolor='rgb(17, 17, 17)')
 
@@ -416,7 +433,7 @@ def update_hist_plot(start_date, end_date, selected_x, selected_label, selected_
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         title=f"{x_str} vs. count",
-        title_font_color='#BBBBBB',
+        title_font_color='#408ec6',
         xaxis={'title': f'{x_str}', 'color': '#BBBBBB'},
         yaxis={'title': 'count', 'color': '#BBBBBB'})
 
@@ -424,5 +441,3 @@ def update_hist_plot(start_date, end_date, selected_x, selected_label, selected_
 
 if __name__ == '__main__':
     app.run_server()
-
-
