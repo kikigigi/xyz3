@@ -90,11 +90,6 @@ server = app.server
 ### layout
 app.layout = dbc.Container([
                             dbc.Row([
-                                dbc.Col(html.Label('Dashboard'),
-                                        style={'padding': '10px 0 4px 20px', 'font-size': '20px',
-                                               'background-color': 'rgb(17, 17, 17'})
-                            ]),
-                            dbc.Row([
                                 dbc.Col([
                                     dcc.DatePickerRange(
                                         id='date_selector',
